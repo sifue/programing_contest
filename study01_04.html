@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8"> 
-<title>違ったやり方幅優先(激遅...) - プログラミングコンテスト勉強会第1回</title>
+<title>激遅のものを改善 - プログラミングコンテスト勉強会第1回</title>
 <script src="http://www.google.com/jsapi"></script>
 <script>
 	google.load("jquery", "1.6.1");
@@ -15,22 +15,22 @@ $(function(){
 		// 以下解答
 		var a = $.parseJSON($("#ary").val());
 		var k = parseInt($("#k").val(), 10);
+		var l = a.length;
 
-		var check = function(sum, ary, selectCount){
+		var check = function(sum, removedIndexes, selectCount){
 			if(selectCount === 0) return false;
-			for(var i = 0; i < ary.length ; i++){
-				var tmpSum = sum + ary[i];
+			for(var i = 0; i < l ; i++){
+				if($.inArray(i, removedIndexes) >= 0) continue;
+				var tmpSum = sum + a[i];
 				if(tmpSum === k) return true;
-				var removedAry = ary.slice(0);
-				removedAry.splice(i, 1);
-				// console.dir(removedAry);
-				// console.log("tmpSum:" + tmpSum + " (removedAry.length):" + removedAry.length + " (selectCount - 1):" + (selectCount - 1));
-				var nextResult = check(tmpSum, removedAry, selectCount - 1);
+				removedIndexes = removedIndexes.slice(0);
+				removedIndexes.push(i);
+				var nextResult = check(tmpSum, removedIndexes, selectCount - 1);
 				if(nextResult) return true;
 			}
 			return false;
 		}
-		var result = check(0, a, a.length)
+		var result = check(0, [], a.length)
 
 		// 解答終了
 		var time = new Date() - startTime;
@@ -43,7 +43,7 @@ $(function(){
 });
 </script>
 </head>
-<h1>部分和問題 違ったやり方幅優先(激遅...) </h1>
+<h1>部分和問題 激遅のものを改善</h1>
 <input id="ary" type="text" size="100" value="[1,10,49,3,8,13,7,23,60,-500,42,599,45,-23,1,10,49,3,8,13]"></input>
 <br>
 <input id="k" type="text" size="10" value="10000"></input>
