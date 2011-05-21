@@ -13,17 +13,26 @@ $(function(){
 	$("#calc").button().click(function(){
 		var startTime = new Date();
 		// 以下解答
-		
 		var a = $.parseJSON($("#ary").val());
 		var k = parseInt($("#k").val(), 10);
-		var dfs = function(n, sum){
-			if(a.length === n) return sum === k;
-			if(dfs(n + 1, sum + parseInt(a[n], 10))) return true;
-			if(dfs(n + 1, sum)) return true;
-			return false;
-		};
-		var result = dfs(0, 0);
+		var l = a.length;
+		var result = false;
 		
+		// ２のn乗をカウントアップ
+		var patternCount = Math.pow(2, l);
+		for(var i = 0; i < patternCount; i++){
+			var sum = 0
+			// 各数を二進数とみて、それぞれのビットフラグが立っていた場合足す
+			for(var j = 0; j < l ; j++){
+				var bitFlag = ((i >> j) & 1)
+				if(bitFlag === 1) sum = sum + a[j];
+			}
+			
+			if(sum === k){
+				result = true;
+				break;
+			}
+		}
 		// 解答終了
 		var time = new Date() - startTime;
 		if(result){
@@ -36,7 +45,7 @@ $(function(){
 </script>
 </head>
 <h1>部分和問題 再帰を使わずに、解いてみる</h1>
-<input id="ary" type="text" size="100" value="[1,10,49,3,8,13,7,23,60,-500,42,599,45,-23,1,10,49,3,8,13,7,23]"></input>
+<input id="ary" type="text" size="100" value="[1,10,49,3,8,13,7,23,60,-500,42,599,45,-23,1,10,49,3,8,13,7,23]""></input>
 <br>
 <input id="k" type="text" size="10" value="10000"></input>
 <br>
