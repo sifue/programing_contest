@@ -24,45 +24,11 @@ $(function(){
 						default : throw "IlegalArgumentException"
 						}
 			};
-		// 現在地フィールドと移動メソッドを定義する現在地オブジェクト
-		var position = { 
-			x : null,
-			y : null,
-			limit : {x : null, y : null},
-			validate : function(testedX, testedY){
-				if(testedX < 0) return false;
-				if(testedX > this.limit.x) return false;
-				if(testedY < 0) return false;
-				if(testedY > this.limit.y) return false;
-				if(getPoint(testedX, testedY).isWall()) return false;
-				return true;
-			},
-			move : function(direction){
-				var tmpX = this.x;
-				var tmpY = this.y;
-				
-				if(direction == "up"){tmpY　=　tmpY - 1;}
-				else if (direction == "down"){tmpY　=　tmpY + 1;}
-				else if (direction == "left"){tmpX = tmpX - 1;}
-				else if (direction == "right"){tmpX = tmpX + 1;}
-				
-				var isValid = this.validate(tmpX, tmpY);
-				if(isValid){
-					this.x = tmpX;
-					this.y = tmpY;
-				}
-				return isValid;
-			},
-			moveUp : function(){ return this.move("up")},
-			moveDown : function(){ return this.move("down")},
-			moveLeft : function(){ return this.move("left")},
-			moveRight : function(){ return this.move("right")}
-			}; 
 		
 		// トリム値を改行で配列にして処理してマップ作成へ
 		var strs = $.trim($("#map").val()).split("\n"); 
-		position.limit.y = strs.length - 1;
-		position.limit.x = strs[0].length - 1;
+		var limit = {x : strs[0].length - 1, y : strs.length - 1 };
+		var start = {x : 0, y : 0}
 		for(var i = 0; i < strs.length; i++){
 			map[i] = [];
 			for(var j = 0; j < strs[i].length; j++){
@@ -70,8 +36,8 @@ $(function(){
 				
 				// スタートをセット
 				if(type === 'S'){ 
-					position.x = j;
-					position.y = i;
+					start.x = j;
+					start.y = i;
 				}
 				
 				// 各地点に入れるオブジェクト
@@ -86,6 +52,69 @@ $(function(){
 			}
 		}
 
+		// 現在地フィールドと移動メソッドを定義する現在地オブジェクト作成メソッド
+		var createPosition = function(position){
+			return { 
+				x : position.x,
+				y : position.y,
+				validate : function(testedX, testedY){
+					if(testedX < 0) return false;
+					if(testedX > limit.x) return false;
+					if(testedY < 0) return false;
+					if(testedY > limit.y) return false;
+					if(getPoint(testedX, testedY).isWall()) return false;
+					return true;
+				},
+				move : function(direction){
+					var tmpX = this.x;
+					var tmpY = this.y;
+					
+					if(direction == "up"){tmpY　=　tmpY - 1;}
+					else if (direction == "down"){tmpY　=　tmpY + 1;}
+					else if (direction == "left"){tmpX = tmpX - 1;}
+					else if (direction == "right"){tmpX = tmpX + 1;}
+					
+					var isValid = this.validate(tmpX, tmpY);
+					if(isValid){
+						this.x = tmpX;
+						this.y = tmpY;
+					}
+					return isValid;
+				},
+				moveUp : function(){ return this.move("up")},
+				moveDown : function(){ return this.move("down")},
+				moveLeft : function(){ return this.move("left")},
+				moveRight : function(){ return this.move("right")}
+			};
+		};
+
+		var moveTypes = ["up", "down", "left", "right"];
+		
+		var position = createPosition(start);
+		console.log(position.moveRight());
+		console.log(position.moveDown());
+		console.log(position.moveRight());
+		console.log(position.moveRight());
+		console.log(position.moveRight());
+		console.log(position.moveDown());
+		console.log(position.moveRight());
+		console.log(position.moveRight());
+		console.log(position.moveRight());
+		console.log(position.moveRight());
+		console.log(position.moveRight());
+		console.log(position.moveDown());
+		console.log(position.moveDown());
+		console.log(position.moveDown());
+		console.log(position.moveDown());
+		console.log(position.moveDown());
+		console.log(position.moveLeft());
+		console.log(position.moveLeft());
+		console.log(position.moveLeft());
+		console.log(position.moveDown());
+		console.log(position.moveDown());
+		console.log(position.moveRight());
+		
+		console.log("isGoal:" + getPoint(position).isGoal());
 		var result = false;
 		// 解答終了
 		var time = new Date() - startTime;
