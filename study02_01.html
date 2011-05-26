@@ -25,6 +25,16 @@ $(function(){
 						}
 			};
 		
+		// 各地点を定義するオブジェクト作成メソッド
+		var createPoint = function(){
+			return {
+					type : type,
+					optimumTracks : null,
+					isWall : function(){ return this.type === 'w'},
+					isGoal : function(){ return this.type === 'G'}
+					};
+		};
+		
 		// トリム値を改行で配列にして処理してマップ作成へ
 		var strs = $.trim($("#map").val()).split("\n"); 
 		var limit = {x : strs[0].length - 1, y : strs.length - 1 };
@@ -33,30 +43,28 @@ $(function(){
 			map[i] = [];
 			for(var j = 0; j < strs[i].length; j++){
 				var type = strs[i].charAt(j);
-				
 				// スタートをセット
 				if(type === 'S'){ 
 					start.x = j;
 					start.y = i;
 				}
-				
-				// 各地点に入れるオブジェクト
-				var point = {
-					type : type,
-					optimumTracks : null,
-					isWall : function(){ return this.type === 'w'},
-					isGoal : function(){ return this.type === 'G'}
-				};
-				map[i][j] = point;
+				// 各地点に入れる地点オブジェクトを格納
+				map[i][j] = createPoint();
 				// console.log("(" + i + "," + j + "):" + map[i][j].isGoal());
 			}
 		}
+		
+		
+
 
 		// 現在地フィールドと移動メソッドを定義する現在地オブジェクト作成メソッド
 		var createPosition = function(position){
 			return { 
 				x : position.x,
 				y : position.y,
+				tracks: position.tracks === undefined ?
+						 [] :
+						 position.tracks.slice(0), //過去の移動履歴があればコピー
 				validate : function(testedX, testedY){
 					if(testedX < 0) return false;
 					if(testedX > limit.x) return false;
@@ -78,6 +86,7 @@ $(function(){
 					if(isValid){
 						this.x = tmpX;
 						this.y = tmpY;
+					    this.tracks.push(direction); // 移動履歴を追加
 					}
 					return isValid;
 				},
@@ -88,34 +97,28 @@ $(function(){
 			};
 		};
 
+		//////// 以下実処理 ///////////
 		var moveTypes = ["up", "down", "left", "right"];
+		var queue = new Queue();
+		queue.enqueue(createPosition(start));
 		
-		var position = createPosition(start);
-		console.log(position.moveRight());
-		console.log(position.moveDown());
-		console.log(position.moveRight());
-		console.log(position.moveRight());
-		console.log(position.moveRight());
-		console.log(position.moveDown());
-		console.log(position.moveRight());
-		console.log(position.moveRight());
-		console.log(position.moveRight());
-		console.log(position.moveRight());
-		console.log(position.moveRight());
-		console.log(position.moveDown());
-		console.log(position.moveDown());
-		console.log(position.moveDown());
-		console.log(position.moveDown());
-		console.log(position.moveDown());
-		console.log(position.moveLeft());
-		console.log(position.moveLeft());
-		console.log(position.moveLeft());
-		console.log(position.moveDown());
-		console.log(position.moveDown());
-		console.log(position.moveRight());
+		var isReached = false;
+		while(!isReached){ // 到着するまでループ
+			var tmpQueue = new Queue(); 
+			while(!queue.isEmpty()){ // 今回のターンで回すべきqueueでループ
+				var preP = queue.dequeue();
+				$.each(moveTypes, function(){ // 4方向動作でループ
+					var nextP = createPosition(preP);
+					if(nextP.move(this)){
+						var point = getPoint(nextP);
+						// 最適ルートがまだなければ格納
+						if(point.optimumTracks == null){point.optimumTracks = nextP.tracks}
+					}
+				});
+			}
+			
+		}
 		
-		console.log("isGoal:" + getPoint(position).isGoal());
-		var result = false;
 		// 解答終了
 		var time = new Date() - startTime;
 		if(result){
@@ -125,6 +128,46 @@ $(function(){
 		}
 	});
 });
+
+/*
+
+Queue.js
+
+A function to represent a queue
+
+Created by Stephen Morley - http://code.stephenmorley.org/ - and released under
+the terms of the CC0 1.0 Universal legal code:
+
+http://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+*/
+function Queue(){
+var _1=[];
+var _2=0;
+this.getLength=function(){
+return (_1.length-_2);
+};
+this.isEmpty=function(){
+return (_1.length==0);
+};
+this.enqueue=function(_3){
+_1.push(_3);
+};
+this.dequeue=function(){
+if(_1.length==0){
+return undefined;
+}
+var _4=_1[_2];
+if(++_2*2>=_1.length){
+_1=_1.slice(_2);
+_2=0;
+}
+return _4;
+};
+this.peek=function(){
+return (_1.length>0?_1[_2]:undefined);
+};
+};
 </script>
 </head>
 <h1>迷路の最短路（P02）</h1>
