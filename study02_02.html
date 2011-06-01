@@ -3,22 +3,22 @@
 <head>
 <style type="text/css">
 .wall{
-	background-color: silver;
+	background-color: #c0c0c0;
 }
 .start{
-	background-color: skyblue;
+	background-color: #00bfff;
 }
 .goal{
-	background-color: pink;
+	background-color: #ffc0cb;
 }
 .way{
-	background-color: ivory;
+	background-color: #fffff0;
 }
 .track{
-	background-color: paleturquoise;
+	background-color: #afeeee;
 }
 .optinum{
-	background-color: plum;
+	background-color: #dda0dd;
 }
 
 </style>
@@ -162,7 +162,7 @@ $(function(){
 		var time = new Date() - startTime;
 		if(isReached){
 			
-			var msg = "OK(" + time +"ms)";
+			var msg = "OK(" + time +"ms) steps:" + tracksToGoal.length + " ";
 			var x = start.x;
 			var y = start.y;
 			$.each(tracksToGoal, function(){

@@ -125,7 +125,7 @@ $(function(){
 		// 解答終了
 		var time = new Date() - startTime;
 		if(isReached){
-			var msg = "OK(" + time +"ms)";
+			var msg = "OK(" + time +"ms) steps:" + tracksToGoal.length + " ";
 			$.each(tracksToGoal, function(){msg = msg + " " + this});
 			$("#answer_area").text(msg);
 		}else{
