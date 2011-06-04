@@ -16,7 +16,7 @@ $(function(){
 		var a = $.parseJSON($("#ary").val()); // 2要素配列の配列 a[n][0]:w , a[n][1]:v
 		var limitW = parseInt($("#w").val(), 10); // wの限界量
 		
-		// 各アイテムの純度(価値/重量)を算出したオブジェクトを定義
+		// 各アイテムの純度(価値/重さ)を算出したオブジェクトを定義
 		var createItem = function(aryElem){
 			return {
 				weight : aryElem[0],
@@ -25,7 +25,7 @@ $(function(){
 			};
 		};
 		
-		// 純度(価値/重量)の降順、重量順の降順にソート
+		// 純度(価値/重さ)の降順、重さ順の降順にソート
 		var sortedAry = [];
 		for(var i = 0; i < a.length ; i++){
 			var item = createItem(a[i]);
@@ -38,7 +38,7 @@ $(function(){
 			}else if (diffP < 0){
 				return 1;
 			}
-			var diffW = a.weight - b.weight // 重量ソート
+			var diffW = a.weight - b.weight // 重さソート
 			if(diffW > 0){
 				return -1;
 			}else if (diffW < 0){
@@ -52,11 +52,11 @@ $(function(){
 		var maxValue = 0; // 最大値
 		var isFirstDeselected = false; //最初の未選択がされたか
 		var search = function(n, isAllSelect, sumValue, sumWeight){
-			if(sumWeight > limitW) return false; // 重量オーバーなら終了
+			if(sumWeight > limitW) return false; // 重さオーバーなら終了
 			//if(sumValue > maxValue) console.log("最大値発見！ " + sumValue);
 			if(sumValue > maxValue) maxValue = sumValue; // 最大値を代入
 
-			// 全足し中で、合計重量と限界重量が一致、もしく、全部足したならこれが最適解
+			// 全足し中で、合計重さと限界重さが一致、もしく、全部足したならこれが最適解
 			if(isAllSelect){
 				if(sumWeight === limitW	|| sortedAry.length === n) return true;
 			} else { 
@@ -91,7 +91,7 @@ $(function(){
 });
 </script>
 </head>
-純度(価値/重量)の降順, 重量の降順ソートして順に入れてみて、最短ではまり切らなかった地点以下を深さ優先で全探索<br>
+純度(価値/重さ)の降順, 重さの降順ソートして順に入れてみて、最短ではまり切らなかった地点以下を深さ優先で全探索<br>
 自分が手でやるときの方法を再現したが、これで絶対大丈夫か少し疑問残る... - 入力は[[w1,v1],[w2,v2]]<br>
 <input id="ary" type="text" size="100" value="[[2,3],[1,2],[3,4],[2,2]]"></input>
 <br>
