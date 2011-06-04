@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"> 
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8"> 
+<title>ナップサック問題 - プログラミングコンテスト勉強会第3回</title>
+<script src="http://www.google.com/jsapi"></script>
+<script>
+	google.load("jquery", "1.6.1");
+	google.load("jqueryui", "1.8.13");
+</script>
+<script type="text/javascript">
+$(function(){
+	$("#calc").button().click(function(){
+		var startTime = new Date();
+		// 以下解答
+		var a = $.parseJSON($("#ary").val()); // 2要素配列の配列 a[n][0]:w , a[n][1]:v
+		var limitW = parseInt($("#w").val(), 10); // wの限界量
+		
+		// 各アイテムの純度(価値/重量)を算出したオブジェクトを定義
+		var createItem = function(aryElem){
+			return {
+				weight : aryElem[0],
+				value : aryElem[1],
+				purity : aryElem[1] / aryElem[0]
+			};
+		};
+		
+		// 純度(価値/重量)の降順、重量順の降順にソート
+		var sortedAry = [];
+		for(var i = 0; i < a.length ; i++){
+			var item = createItem(a[i]);
+			sortedAry.push(item);
+		}
+		sortedAry.sort(function(a, b){
+			var diffP = a.purity - b.purity; // 純度ソート
+			if(diffP > 0){
+				return -1;
+			}else if (diffP < 0){
+				return 1;
+			}
+			var diffW = a.weight - b.weight // 重量ソート
+			if(diffW > 0){
+				return -1;
+			}else if (diffW < 0){
+				return 1;
+			}
+			return 0;
+		});
+		// console.dir(sortedAry);
+		
+		// 深さ優先探索
+		var maxValue = 0; // 最大値
+		var isFirstDeselected = false; //最初の未選択がされたか
+		var search = function(n, isAllSelect, sumValue, sumWeight){
+			if(sumWeight > limitW) return false; // 重量オーバーなら終了
+			//if(sumValue > maxValue) console.log("最大値発見！ " + sumValue);
+			if(sumValue > maxValue) maxValue = sumValue; // 最大値を代入
+
+			// 全足し中で、合計重量と限界重量が一致、もしく、全部足したならこれが最適解
+			if(isAllSelect){
+				if(sumWeight === limitW	|| sortedAry.length === n) return true;
+			} else { 
+				if(sortedAry.length === n) return false; // 全足しでなく、最後なら終了
+			}
+			
+			// 足して全足しでいけるか調べる
+			var next = sortedAry[n];
+			//console.log("n:" + n + " next.value:" + next.value + " next.weight:" + next.weight + " maxValue:" + maxValue + " isAllSelect:" + isAllSelect + " sumValue:" + sumValue + " sumWeight:" + sumWeight)
+			if(search(n + 1, isAllSelect, sumValue + next.value, sumWeight + next.weight)){
+				return true;
+			} else if(!isFirstDeselected){ // 未選択が初めて来た時の分岐だけ
+				// 全足しじゃダメだということが分かったそれ以下のパターンだけ全探索
+				isFirstDeselected = true;
+				if(search(n + 1, false, sumValue, sumWeight)) return false;
+			}
+			
+			// 全足しじゃない時の分岐のみ全検索する
+			if(isAllSelect || search(n + 1, isAllSelect, sumValue, sumWeight)) return false;
+			return false;
+		};
+		var isMinimalStep = search(0, true, 0, 0);
+	
+		// 解答終了
+		var time = new Date() - startTime;
+		if(isMinimalStep){
+			$("#answer_area").text(maxValue + " 最短で発見 (" + time +"ms)");
+		}else{
+			$("#answer_area").text(maxValue + " 最短で発見できず (" + time +"ms)");
+		}
+	});
+});
+</script>
+</head>
+純度(価値/重量)の降順, 重量の降順ソートして順に入れてみて、最短ではまり切らなかった地点以下を深さ優先で全探索<br>
+自分が手でやるときの方法を再現したが、これで絶対大丈夫か少し疑問残る... - 入力は[[w1,v1],[w2,v2]]<br>
+<input id="ary" type="text" size="100" value="[[2,3],[1,2],[3,4],[2,2]]"></input>
+<br>
+<input id="w" type="text" size="10" value="5"></input>
+<br>
+<button id="calc" >Calc!</button>
+<br>
+vの総和の最大値: <span id="answer_area"></span>
+<br>
+<div><a href="http://d.hatena.ne.jp/sifue">吉村 総一郎</a></div><br>
+</body>
+</html>
