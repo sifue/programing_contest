@@ -46,36 +46,28 @@ $(function(){
 			}
 			return 0;
 		});
-		// console.dir(sortedAry);
+		console.dir(sortedAry);
 		
 		// 深さ優先探索
 		var maxValue = 0; // 最大値
 		var isFirstDeselected = false; //最初の未選択がされたか
 		var search = function(n, isAllSelect, sumValue, sumWeight){
 			if(sumWeight > limitW) return false; // 重さオーバーなら終了
-			//if(sumValue > maxValue) console.log("最大値発見！ " + sumValue);
+			if(sumValue > maxValue) console.log("最大値発見！ " + sumValue);
 			if(sumValue > maxValue) maxValue = sumValue; // 最大値を代入
+			if(sumWeight === limitW) return true; // 重さピッタリなら最適解発見
 
-			// 全足し中で、合計重さと限界重さが一致、もしく、全部足したならこれが最適解
+			// 全足し中で、重量オーバーせず全部足したならこれが最適解
 			if(isAllSelect){
-				if(sumWeight === limitW	|| sortedAry.length === n) return true;
-			} else { 
-				if(sortedAry.length === n) return false; // 全足しでなく、最後なら終了
+				if(sortedAry.length === n) return true;
+			} else {  // 全足しでなく、最後なら最適解見つからず終了
+				if(sortedAry.length === n) return false;
 			}
 			
-			// 足して全足しでいけるか調べる
 			var next = sortedAry[n];
-			//console.log("n:" + n + " next.value:" + next.value + " next.weight:" + next.weight + " maxValue:" + maxValue + " isAllSelect:" + isAllSelect + " sumValue:" + sumValue + " sumWeight:" + sumWeight)
-			if(search(n + 1, isAllSelect, sumValue + next.value, sumWeight + next.weight)){
-				return true;
-			} else if(!isFirstDeselected){ // 未選択が初めて来た時の分岐だけ
-				// 全足しじゃダメだということが分かったそれ以下のパターンだけ全探索
-				isFirstDeselected = true;
-				if(search(n + 1, false, sumValue, sumWeight)) return false;
-			}
-			
-			// 全足しじゃない時の分岐のみ全検索する
-			if(isAllSelect || search(n + 1, isAllSelect, sumValue, sumWeight)) return false;
+			console.log("n:" + n + " next.value:" + next.value + " next.weight:" + next.weight + " maxValue:" + maxValue + " isAllSelect:" + isAllSelect + " sumValue:" + sumValue + " sumWeight:" + sumWeight)
+			if(search(n + 1, isAllSelect, sumValue + next.value, sumWeight + next.weight)) return true;
+			if(search(n + 1, false, sumValue, sumWeight)) return true;
 			return false;
 		};
 		var isMinimalStep = search(0, true, 0, 0);
@@ -83,16 +75,16 @@ $(function(){
 		// 解答終了
 		var time = new Date() - startTime;
 		if(isMinimalStep){
-			$("#answer_area").text(maxValue + " 最短で発見 (" + time +"ms)");
+			$("#answer_area").text(maxValue + " 全入れまたは、重さピッタリで発見 (" + time +"ms)");
 		}else{
-			$("#answer_area").text(maxValue + " 最短で発見できず (" + time +"ms)");
+			$("#answer_area").text(maxValue + " 全入れまたは、重さピッタリで発見できず (" + time +"ms)");
 		}
 	});
 });
 </script>
 </head>
-純度(価値/重さ)の降順, 重さの降順ソートして順に入れてみて、最短ではまり切らなかった地点以下を深さ優先で全探索<br>
-自分が手でやるときの方法を再現したが、これで絶対大丈夫か少し疑問残る... - 入力は[[w1,v1],[w2,v2]]<br>
+純度(価値/重さ)の降順, 重さの降順ソートして順に入れてみて、ぴったり揃うまで深さ優先全探索<br>
+最後まで重さ合計がぴったり揃わなければ最後まで全探索 - 入力は[[w1,v1],[w2,v2]]<br>
 <input id="ary" type="text" size="100" value="[[2,3],[1,2],[3,4],[2,2]]"></input>
 <br>
 <input id="w" type="text" size="10" value="5"></input>
