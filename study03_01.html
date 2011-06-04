@@ -46,14 +46,14 @@ $(function(){
 			}
 			return 0;
 		});
-		console.dir(sortedAry);
+		//console.dir(sortedAry);
 		
 		// 深さ優先探索
 		var maxValue = 0; // 最大値
 		var isFirstDeselected = false; //最初の未選択がされたか
 		var search = function(n, isAllSelect, sumValue, sumWeight){
 			if(sumWeight > limitW) return false; // 重さオーバーなら終了
-			if(sumValue > maxValue) console.log("最大値発見！ " + sumValue);
+			//if(sumValue > maxValue) console.log("最大値発見！ " + sumValue);
 			if(sumValue > maxValue) maxValue = sumValue; // 最大値を代入
 			if(sumWeight === limitW) return true; // 重さピッタリなら最適解発見
 
@@ -65,7 +65,7 @@ $(function(){
 			}
 			
 			var next = sortedAry[n];
-			console.log("n:" + n + " next.value:" + next.value + " next.weight:" + next.weight + " maxValue:" + maxValue + " isAllSelect:" + isAllSelect + " sumValue:" + sumValue + " sumWeight:" + sumWeight)
+			//console.log("n:" + n + " next.value:" + next.value + " next.weight:" + next.weight + " maxValue:" + maxValue + " isAllSelect:" + isAllSelect + " sumValue:" + sumValue + " sumWeight:" + sumWeight)
 			if(search(n + 1, isAllSelect, sumValue + next.value, sumWeight + next.weight)) return true;
 			if(search(n + 1, false, sumValue, sumWeight)) return true;
 			return false;
