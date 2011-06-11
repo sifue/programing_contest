@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"> 
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8"> 
+<title>最長共通部分列問題 - プログラミングコンテスト勉強会第4回</title>
+<script src="http://www.google.com/jsapi"></script>
+<script>
+	google.load("jquery", "1.6.1");
+	google.load("jqueryui", "1.8.13");
+</script>
+<script type="text/javascript">
+$(function(){
+	$("#calc").button().click(function(){
+		var startTime = new Date();
+		// 以下解答
+		var s1 = $("#s1").val();
+		var s2 = $("#s2").val();
+		
+		// s1から各キャラクタごとのインデックスのマップを作成
+		var mapCharIndexes = {};
+		for (var i=0; i < s1.length; i++) {
+			var c = s1.charAt(i);
+			var indexes = mapCharIndexes[c];
+			if (indexes) {
+				indexes.push(i);
+			} else{
+				mapCharIndexes[c] = [i];
+			};			
+		};
+		
+		// s2を最初から走査して、可能性のあるもののインデックス配列を作成していく
+		var queueCommons = new Queue();
+		queueCommons.enqueue([]);
+		for (var i=0; i < s2.length; i++) {
+			var c = s2.charAt(i);
+			var nextQueue = new Queue(); 
+			console.log("ただいま : " + c);
+			while(!queueCommons.isEmpty()){
+				var commonIndexes = queueCommons.dequeue();
+				console.dir(commonIndexes);
+				nextQueue.enqueue(commonIndexes); // 何もしないパターンを候補に入れる
+				var maxIndex = commonIndexes.length === 0 ? // 現在の最大インデックス
+					 -1 :
+					 commonIndexes[commonIndexes.length - 1]; 
+				var indexes = mapCharIndexes[c];
+				if(indexes === undefined) continue;
+				// 共通キャラクタの全インデックスの中で現在の最大インデックスよりも大きいものだけenqueue
+				for (var j=0; j < indexes.length; j++) {
+					var index = indexes[j];
+					if(index > maxIndex){
+						var newCommon = commonIndexes.slice(0);
+						newCommon.push(index);
+						nextQueue.enqueue(newCommon);
+					};
+				};
+			};
+			console.log("次の探索キューの個数は : " + nextQueue.getLength());
+			queueCommons = nextQueue; // queueを入れ替えて次の文字へ
+		};
+		
+		// 最大長のものを抽出
+		var maxLengthIndexes = [];
+		while(!queueCommons.isEmpty()){
+			var commonIndexes = queueCommons.dequeue();
+			if(commonIndexes.length > maxLengthIndexes.length){
+				maxLengthIndexes = commonIndexes;
+			}
+		}
+		var result = '';
+		for (var i=0; i < maxLengthIndexes.length; i++) {
+			result = result + s1.charAt(maxLengthIndexes[i]);
+		};
+		
+		// 解答終了
+		var time = new Date() - startTime;
+		if(result){
+			$("#answer_area").text( result + " (" + time +"ms)");
+		}else{
+			$("#answer_area").text("発見できず (" + time +"ms)");
+		}
+	});
+});
+
+/*
+
+Queue.js
+
+A function to represent a queue
+
+Created by Stephen Morley - http://code.stephenmorley.org/ - and released under
+the terms of the CC0 1.0 Universal legal code:
+
+http://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+*/
+function Queue(){
+var _1=[];
+var _2=0;
+this.getLength=function(){
+return (_1.length-_2);
+};
+this.isEmpty=function(){
+return (_1.length==0);
+};
+this.enqueue=function(_3){
+_1.push(_3);
+};
+this.dequeue=function(){
+if(_1.length==0){
+return undefined;
+}
+var _4=_1[_2];
+if(++_2*2>=_1.length){
+_1=_1.slice(_2);
+_2=0;
+}
+return _4;
+};
+this.peek=function(){
+return (_1.length>0?_1[_2]:undefined);
+};
+};
+</script>
+</head>
+s1の全ての文字に対して、全インデックスを持つマップを作る。<br>
+その後、s2を最初から捜査していき最長の共通文字列をqueueを使って作成していく。<br>
+最後にその中の最長のものを提示する。
+<input id="s1" type="text" size="100" value="abcd"></input>
+<br>
+<input id="s2" type="text" size="100" value="becd"></input>
+<br>
+<button id="calc" >Calc!</button>
+<br>
+答えは: <span id="answer_area"></span>
+<br>
+<div><a href="http://d.hatena.ne.jp/sifue">吉村 総一郎</a></div><br>
+</body>
+</html>
