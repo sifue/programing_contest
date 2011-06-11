@@ -13,8 +13,9 @@ $(function(){
 	$("#calc").button().click(function(){
 		var startTime = new Date();
 		// 以下解答
-		var s1 = $("#s1").val();
-		var s2 = $("#s2").val();
+		var isS1Long = $("#s1").val().length >= $("#s2").val().length;
+		var s1 = isS1Long ? $("#s1").val() : $("#s2").val() ;
+		var s2 = isS1Long ? $("#s2").val() : $("#s1").val() ;
 		
 		// s1から各キャラクタごとのインデックスのマップを作成
 		var mapCharIndexes = {};
@@ -40,7 +41,11 @@ $(function(){
 			// 現在の全可能性をチェック
 			while(!queueCommons.isEmpty()){
 				var commonIndexes = queueCommons.dequeue();
-				nextQueue.enqueue(commonIndexes); // 何もしないパターンを候補に入れる
+				// 暫定最大長にかなわないならやめる
+				var diffFromMax = maxLengthIndexes.length - commonIndexes.length;
+				if(diffFromMax >= (s2.length - 1 - i)) continue; 
+				
+				nextQueue.enqueue(commonIndexes); // 何もしないパターンを次候補に入れる
 				var maxIndex = commonIndexes.length === 0 ? // 現在の最大インデックス
 					 -1 :
 					 commonIndexes[commonIndexes.length - 1]; 
@@ -61,7 +66,7 @@ $(function(){
 				};
 			};
 			queueCommons = nextQueue; // queueを入れ替えて次の文字へ
-			console.log("nextQueue.getLength():" + nextQueue.getLength());
+			console.log("i:" + i + " nextQueue.getLength():" + nextQueue.getLength());
 		};
 		
 		// 結果の文字列に作り直し
@@ -124,9 +129,9 @@ return (_1.length>0?_1[_2]:undefined);
 s1の全ての文字に対して、全インデックスを持つマップを作る。<br>
 その後、s2を最初から捜査していき最長の共通文字列の可能性をqueueに入れていく。<br>
 最後にその中の最長のものを提示する。
-<input id="s1" type="text" size="100" value="AAABBBBCCCCCABBBBCCCCCBBBCCCCCAB"></input>
+<input id="s1" type="text" size="100" value="AAABBBBCCCCCABBBBCCCCCBBBCCCCCABCCCCCAB"></input>
 <br>
-<input id="s2" type="text" size="100" value="CCCBBBAAABABABAAABABABAAABABA"></input>
+<input id="s2" type="text" size="100" value="CCCBBBAAABABABAAABABABAAABABABBBCCCCC"></input>
 <br>
 <button id="calc" >Calc!</button>
 <br>
