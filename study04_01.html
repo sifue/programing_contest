@@ -28,44 +28,43 @@ $(function(){
 			};			
 		};
 		
-		// s2を最初から走査して、可能性のあるもののインデックス配列を作成していく
+		// 最大長のものを保存する変数
+		var maxLengthIndexes = [];
+		
+		// s2を最初から走査して、queueを使って可能性のあるもののインデックス配列を作成していく
 		var queueCommons = new Queue();
 		queueCommons.enqueue([]);
 		for (var i=0; i < s2.length; i++) {
 			var c = s2.charAt(i);
 			var nextQueue = new Queue(); 
-			console.log("ただいま : " + c);
+			// 現在の全可能性をチェック
 			while(!queueCommons.isEmpty()){
 				var commonIndexes = queueCommons.dequeue();
-				console.dir(commonIndexes);
 				nextQueue.enqueue(commonIndexes); // 何もしないパターンを候補に入れる
 				var maxIndex = commonIndexes.length === 0 ? // 現在の最大インデックス
 					 -1 :
 					 commonIndexes[commonIndexes.length - 1]; 
 				var indexes = mapCharIndexes[c];
 				if(indexes === undefined) continue;
-				// 共通キャラクタの全インデックスの中で現在の最大インデックスよりも大きいものだけenqueue
+				// 共通キャラクタの全インデックスの中で最大インデックスより次に大きいものをenqueue
 				for (var j=0; j < indexes.length; j++) {
 					var index = indexes[j];
 					if(index > maxIndex){
 						var newCommon = commonIndexes.slice(0);
 						newCommon.push(index);
 						nextQueue.enqueue(newCommon);
+						
+						// 最大共通部であれば保存
+						if(newCommon.length > maxLengthIndexes.length) maxLengthIndexes = newCommon;
+						break; // 最大以上で最小のインデックスを入れたら終了
 					};
 				};
 			};
-			console.log("次の探索キューの個数は : " + nextQueue.getLength());
 			queueCommons = nextQueue; // queueを入れ替えて次の文字へ
+			console.log("nextQueue.getLength():" + nextQueue.getLength());
 		};
 		
-		// 最大長のものを抽出
-		var maxLengthIndexes = [];
-		while(!queueCommons.isEmpty()){
-			var commonIndexes = queueCommons.dequeue();
-			if(commonIndexes.length > maxLengthIndexes.length){
-				maxLengthIndexes = commonIndexes;
-			}
-		}
+		// 結果の文字列に作り直し
 		var result = '';
 		for (var i=0; i < maxLengthIndexes.length; i++) {
 			result = result + s1.charAt(maxLengthIndexes[i]);
@@ -74,9 +73,9 @@ $(function(){
 		// 解答終了
 		var time = new Date() - startTime;
 		if(result){
-			$("#answer_area").text( result + " (" + time +"ms)");
+			$("#answer_area").text(result.length + ' ("' + result + '") (処理時間:' + time + 'ms)');
 		}else{
-			$("#answer_area").text("発見できず (" + time +"ms)");
+			$("#answer_area").text('発見できず  (処理時間:' + time + 'ms)');
 		}
 	});
 });
@@ -123,11 +122,11 @@ return (_1.length>0?_1[_2]:undefined);
 </script>
 </head>
 s1の全ての文字に対して、全インデックスを持つマップを作る。<br>
-その後、s2を最初から捜査していき最長の共通文字列をqueueを使って作成していく。<br>
+その後、s2を最初から捜査していき最長の共通文字列の可能性をqueueに入れていく。<br>
 最後にその中の最長のものを提示する。
-<input id="s1" type="text" size="100" value="abcd"></input>
+<input id="s1" type="text" size="100" value="AAABBBBCCCCCABBBBCCCCCBBBCCCCCAB"></input>
 <br>
-<input id="s2" type="text" size="100" value="becd"></input>
+<input id="s2" type="text" size="100" value="CCCBBBAAABABABAAABABABAAABABA"></input>
 <br>
 <button id="calc" >Calc!</button>
 <br>
