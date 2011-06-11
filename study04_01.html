@@ -13,6 +13,7 @@ $(function(){
 	$("#calc").button().click(function(){
 		var startTime = new Date();
 		// 以下解答
+		// 短い方をs2にしたい
 		var isS1Long = $("#s1").val().length >= $("#s2").val().length;
 		var s1 = isS1Long ? $("#s1").val() : $("#s2").val() ;
 		var s2 = isS1Long ? $("#s2").val() : $("#s1").val() ;
@@ -32,7 +33,7 @@ $(function(){
 		// 最大長のものを保存する変数
 		var maxLengthIndexes = [];
 		
-		// s2を最初から走査して、queueを使って可能性のあるもののインデックス配列を作成していく
+		// s2を最初から走査して、queueを使って最大共通の可能性のあるインデックス配列を作成していく
 		var queueCommons = new Queue();
 		queueCommons.enqueue([]);
 		for (var i=0; i < s2.length; i++) {
