@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"> 
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8"> 
+<title>重複組合せ - プログラミングコンテスト勉強会第5回</title>
+<script src="http://www.google.com/jsapi"></script>
+<script>
+	google.load("jquery", "1.6.1");
+	google.load("jqueryui", "1.8.13");
+</script>
+<script type="text/javascript">
+$(function(){
+	$("#calc").button().click(function(){
+		var startTime = new Date();
+		// 以下解答
+		var ary = $.parseJSON($("#ary").val());
+		var a = function(i){return ary[i-1];};
+		var m = parseInt($("#m").val(), 10);
+		var divider = parseInt($("#divider").val(), 10);
+		
+		// iの引数をk, mの引数をnとする再帰関数
+		var getCombination = function(k, n){
+			if(k == 1) return a(k) >= n ? 1 : 0;
+			var sum = 0;
+			var minNextN = n - a(k);
+			minNextN = minNextN < 0 ? 0 : minNextN;
+			for (var nextN=minNextN; nextN <= n; nextN++) { // minNextNからnまでnextNを増加
+		 		var partCombi = getCombination(k-1, nextN);
+		 		console.log("f(k=" + (k-1) + ",n=" + nextN + ") is " + partCombi);
+		 		sum = sum + partCombi;
+			};	
+			return sum;
+		};
+
+		var combi = getCombination(ary.length, m);
+		console.log("f(k=" + ary.length + ",n=" + m + ") is " + combi);
+		
+		// 解答終了
+		var time = new Date() - startTime;
+		$("#answer_area").text( (combi % divider) + " (" + time +"ms)");
+	});
+});
+</script>
+</head>
+<b>動的計画法(Dinamic Programing)をつかった解法</b><br>
+kを配列aの長さ(i)、nを品物の数(m)とした時、以下の漸化式が成り立つ。<br>
+f(k,n) = f(k-1, n) + f(k-1, n-1) + ... +  f(k-1, n-a[k]) <br>
+また、k = 1の時、a[k]の値がmより小さい場合は、1通りの組み合わせがある。<br>
+以上をプログラムとして表現した。<br>
+a : <input id="ary" type="text" size="100" value="[1,2,3]"></input>
+<br>
+m : <input id="m" type="text" size="10" value="3"></input>
+<br>
+M : <input id="divider" type="text" size="10" value="10000"></input>
+<br>
+<button id="calc" >Calc!</button>
+<br>
+答えは: <span id="answer_area"></span>
+<br>
+<div><a href="http://d.hatena.ne.jp/sifue">吉村 総一郎</a></div><br>
+</body>
+</html>
