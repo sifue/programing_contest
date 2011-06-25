@@ -1,0 +1,272 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"> 
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8"> 
+<title>Expedition - プログラミングコンテスト勉強会第6回</title>
+<script src="http://www.google.com/jsapi"></script>
+<script>
+	google.load("jquery", "1.6.1");
+	google.load("jqueryui", "1.8.13");
+</script>
+<script type="text/javascript">
+$(function(){
+	$("#calc").button().click(function(){
+		var startTime = new Date();
+		// 以下解答
+		var a = $.parseJSON($("#ary_a").val());
+		var b = $.parseJSON($("#ary_b").val());
+		var n = parseInt($("#n").val(), 10);
+		var l = parseInt($("#l").val(), 10);
+		var p = parseInt($("#p").val(), 10);
+		
+		// start地点をstep=0としi番目のガソリンスタンドの際はstep=iとする、ゴールはstep=n+1
+		var getFuel = function(step){ return b[step-1];};
+		var getDistanceToNext = function(step){
+			if(step == 0) return a[0];
+			if(step == a.length) return l - a[a.length-1]; //最後はゴールまでの距離
+			return a[step] - a[step-1];
+		};
+		
+		// トラックオブジェクトの作成メソッド
+		var createTruck = function(truck) { 
+			return {	step : truck.step,
+						fuel : truck.fuel,
+						refillCount : truck.refillCount,
+						history : truck.history.slice(0),
+						_move : function (){
+							var d = getDistanceToNext(this.step);
+							if(this.fuel < d ) return null;
+							var t = createTruck(this);
+							t.step++;
+							t.fuel = t.fuel - d;
+							return t;
+						},
+						moveOnly : function(){
+							var t = this._move();
+							if(t == null) return null;
+							t.history.push(false);
+							return t;
+						} ,
+						moveAndRefill : function(){
+							var t = this._move();
+							if(t == null) return null;
+							t.fuel = t.fuel + getFuel(t.step);
+							t.refillCount++;
+							t.history.push(true);
+							return t;
+						},
+						moveToGoal : function(){
+							var t = this._move();
+							if(t == null) return null;
+							return t;
+						}
+					};
+			};
+		
+		// PriorityQueueでカウントが少ないかつ燃料が多い順に順位付けを与えるために用意
+		var getPriority = function(truck){
+			var p = (-1 * (truck.refillCount * 10000)) + truck.fuel;
+			return p;
+		};
+		
+		var initTruck = createTruck({
+			step : 0,
+			fuel : p,
+			refillCount : 0,
+			history : [],
+		});
+		
+		var stepOfGoal = n + 1;
+		var queue = PriorityQueue();
+		queue.push(initTruck, getPriority(initTruck));
+		for (var i=0; i < stepOfGoal; i++) {
+			var nextQueue = PriorityQueue();
+			while(!queue.empty()){
+				var t = queue.pop();
+				if(t.step == n){ // 最後のガソリンスタンドなら次はゴールへ
+					var tMoveToGoal = t.moveToGoal();
+					if(tMoveToGoal) nextQueue.push(tMoveToGoal, getPriority(tMoveToGoal));
+				} else { // 移動して給油する場合としない場合を実施
+					var tMoveOnly = t.moveOnly();
+					if(tMoveOnly) nextQueue.push(tMoveOnly, getPriority(tMoveOnly));
+					var tMoveAndRefill = t.moveAndRefill();
+					if(tMoveAndRefill) nextQueue.push(tMoveAndRefill, getPriority(tMoveAndRefill));
+				}
+			};
+			queue = nextQueue;
+		};
+		
+		var result = null;
+		while(!queue.empty()){
+			var t = queue.pop();
+			console.dir(t); // 全候補をログ出力
+			if(!result) result = t;
+		} 
+		
+		// 解答終了
+		var time = new Date() - startTime;
+		if(result){
+			var msg = result.refillCount + "回給油 残り燃料 : " +  result.fuel +   " (" + time +"ms) 給油履歴 : ";
+			$.each(result.history, function(){msg = msg + " " + this});
+			$("#answer_area").text(msg);
+		}else{
+			$("#answer_area").text("-1 (" + time +"ms) どうやっても辿りつけません...");
+		}
+	});
+});
+// https://github.com/STRd6/PriorityQueue.js/blob/master/src/priority_queue.js
+(function() {
+  /**
+   * @private
+   */
+  var prioritySortLow = function(a, b) {
+    return b.priority - a.priority;
+  };
+
+  /**
+   * @private
+   */
+  var prioritySortHigh = function(a, b) {
+    return a.priority - b.priority;
+  };
+
+  /*global PriorityQueue */
+  /**
+   * @constructor
+   * @class PriorityQueue manages a queue of elements with priorities. Default
+   * is highest priority first.
+   *
+   * @param [options] If low is set to true returns lowest first.
+   */
+  PriorityQueue = function(options) {
+    var contents = [];
+
+    var sorted = false;
+    var sortStyle;
+
+    if(options && options.low) {
+      sortStyle = prioritySortLow;
+    } else {
+      sortStyle = prioritySortHigh;
+    }
+
+    /**
+     * @private
+     */
+    var sort = function() {
+      contents.sort(sortStyle);
+      sorted = true;
+    };
+
+    var self = {
+      /**
+       * Removes and returns the next element in the queue.
+       * @member PriorityQueue
+       * @return The next element in the queue. If the queue is empty returns
+       * undefined.
+       *
+       * @see PrioirtyQueue#top
+       */
+      pop: function() {
+        if(!sorted) {
+          sort();
+        }
+
+        var element = contents.pop();
+
+        if(element) {
+          return element.object;
+        } else {
+          return undefined;
+        }
+      },
+
+      /**
+       * Returns but does not remove the next element in the queue.
+       * @member PriorityQueue
+       * @return The next element in the queue. If the queue is empty returns
+       * undefined.
+       *
+       * @see PriorityQueue#pop
+       */
+      top: function() {
+        if(!sorted) {
+          sort();
+        }
+
+        var element = contents[contents.length - 1];
+
+        if(element) {
+          return element.object;
+        } else {
+          return undefined;
+        }
+      },
+
+      /**
+       * @member PriorityQueue
+       * @param object The object to check the queue for.
+       * @returns true if the object is in the queue, false otherwise.
+       */
+      includes: function(object) {
+        for(var i = contents.length - 1; i >= 0; i--) {
+          if(contents[i].object === object) {
+            return true;
+          }
+        }
+
+        return false;
+      },
+
+      /**
+       * @member PriorityQueue
+       * @returns the current number of elements in the queue.
+       */
+      size: function() {
+        return contents.length;
+      },
+
+      /**
+       * @member PriorityQueue
+       * @returns true if the queue is empty, false otherwise.
+       */
+      empty: function() {
+        return contents.length === 0;
+      },
+
+      /**
+       * @member PriorityQueue
+       * @param object The object to be pushed onto the queue.
+       * @param priority The priority of the object.
+       */
+      push: function(object, priority) {
+        contents.push({object: object, priority: priority});
+        sorted = false;
+      }
+    };
+
+    return self;
+  };
+})();
+</script>
+</head>
+全ガソリンスタンドでの入れる時、入れない時を幅優先全探索。<br>
+ただし、候補は過去の給油回数が少ない順、残りの燃料の多い順に走査を行っている。<br>
+PriorityQueueを使っているが、最後のステップの計算量が少ないだけで特に大きく改善されているわけではない。<br>
+N : <input id="n" type="text" size="10" value="4"></input>
+<br>
+L : <input id="l" type="text" size="10" value="25"></input>
+<br>
+P : <input id="p" type="text" size="10" value="10"></input>
+<br>
+A : <input id="ary_a" type="text" size="100" value="[10,14,20,21]"></input>
+<br>
+B : <input id="ary_b" type="text" size="100" value="[10,5,2,4]"></input>
+<br>
+<button id="calc" >Calc!</button>
+<br>
+答えは: <span id="answer_area"></span>
+<br>
+<div><a href="http://d.hatena.ne.jp/sifue">吉村 総一郎</a></div><br>
+</body>
+</html>
