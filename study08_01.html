@@ -37,12 +37,12 @@ $(function(){
 			allInfos.push(createInfo((i+1),a[i][0],a[i][1],a[i][2]))
 		};
 		
-		// mapに値を格納して新mapを返す。値が入ってた時はそのまま、既に違う値が入っていたときnullを返す
+		// mapに値を格納してmap自身を返す。値が入ってた時はそのまま、既に違う値が入っていたときnullを返す
 		var tryPut = function(map, key, value){
 			if (key > n) return null;
 			if (map[key] == undefined){
 					map[key] = value;
-					return copyObject(map);
+					return map;
 				} else {
 					return map[key] == value ? map : null;
 				}
@@ -54,11 +54,12 @@ $(function(){
 			var info = infos[n];
 			var candidates = info.candidates;
 			for (var i=0; i < candidates.length; i++) {
+				var resultMap = map.slice(0);
 				var pair = candidates[i]
-				var resultMap = tryPut(map, info.x, pair[0]);
-				if(!resultMap) return false;
-				resultMap = tryPut(map, info.y, pair[1]);
-				if(!resultMap) return false;
+				resultMap = tryPut(resultMap, info.x, pair[0]);
+				if(!resultMap) continue;
+				resultMap = tryPut(resultMap, info.y, pair[1]);
+				if(!resultMap) continue;
 				console.dir(resultMap);
 				var isCorrect = check(n+1, infos, resultMap);
 				if(isCorrect) return true; // 正しいのが見つかれば終了、でなければ次候補
@@ -72,7 +73,7 @@ $(function(){
 		for (var i=0; i < allInfos.length; i++) {
 			var tmpInfos = correctInfos.slice(0);
 			tmpInfos.push(allInfos[i]);
-			var isCorrect = check(0, tmpInfos, {});
+			var isCorrect = check(0, tmpInfos, []);
 			if(isCorrect){
 				correctInfos = tmpInfos;
 			}else{
@@ -87,33 +88,6 @@ $(function(){
 		$("#answer_area").text(msg);
 	});
 });
-
-// オブジェクトコピー
-function copyObject(src)
-{
-var dest;
-
-if (typeof src == 'object') {
-   if (src instanceof Array) {
-     dest = new Array();
-     for (var i=0;i<src.length;i++) {
-       dest[i] = copyObject(src[i]);
-     }
-   }
-   else
-   {
-     dest = new Object();
-     for (prop in src) {
-       dest[prop] = copyObject(src[prop]);
-     }
-   }
- }
- else {
-   dest = src;
- }
- return dest;
-}
-
 </script>
 </head>
 <h1>各情報の可能性を全網羅する全探索</h1>
