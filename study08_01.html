@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"> 
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8"> 
+<title>食物連鎖 - プログラミングコンテスト勉強会第8回</title>
+<script src="http://www.google.com/jsapi"></script>
+<script>
+	google.load("jquery", "1.6.1");
+	google.load("jqueryui", "1.8.13");
+</script>
+<script type="text/javascript">
+$(function(){
+	$("#calc").button().click(function(){
+		var startTime = new Date();
+		// 以下解答
+		var a = $.parseJSON($("#ary").val());
+		var n = parseInt($("#n").val(), 10);
+		var candidatesType1 =  [["A","A"],["B","B"],["C","C"]];
+		var candidatesType2 =  [["A","B"],["B","C"],["C","A"]];
+		
+		// 与えられた情報のデータクラスInfo作成
+		var createInfo = function(i,typeNum, x, y){
+			var candidates = [];
+			if (typeNum==1) {
+				candidates = candidatesType1;
+			} else if(typeNum==2){
+				candidates = candidatesType2;
+			};
+			return {i:i,
+					typeNum:typeNum,
+					x:x,
+					y:y,
+					candidates:candidates};
+		};
+		var allInfos = [];
+		for (var i=0; i < a.length; i++) {
+			allInfos.push(createInfo((i+1),a[i][0],a[i][1],a[i][2]))
+		};
+		
+		// mapに値を格納して新mapを返す。値が入ってた時はそのまま、既に違う値が入っていたときnullを返す
+		var tryPut = function(map, key, value){
+			if (key > n) return null;
+			if (map[key] == undefined){
+					map[key] = value;
+					return copyObject(map);
+				} else {
+					return map[key] == value ? map : null;
+				}
+		};
+		
+		// 前候補を深さ優先探索する再帰関数、成立するならtrueが返る
+		var check = function(n, infos, map){
+			if (n == infos.length) return true; // 最後までチェックしきれれば終了
+			var info = infos[n];
+			var candidates = info.candidates;
+			for (var i=0; i < candidates.length; i++) {
+				var pair = candidates[i]
+				var resultMap = tryPut(map, info.x, pair[0]);
+				if(!resultMap) return false;
+				resultMap = tryPut(map, info.y, pair[1]);
+				if(!resultMap) return false;
+				console.dir(resultMap);
+				var isCorrect = check(n+1, infos, resultMap);
+				if(isCorrect) return true; // 正しいのが見つかれば終了、でなければ次候補
+			};
+			return false;
+		};
+		
+		// 前候補を最初から順番にチェック
+		var correctInfos = [];
+		var incorrectInfos = [];
+		for (var i=0; i < allInfos.length; i++) {
+			var tmpInfos = correctInfos.slice(0);
+			tmpInfos.push(allInfos[i]);
+			var isCorrect = check(0, tmpInfos, {});
+			if(isCorrect){
+				correctInfos = tmpInfos;
+			}else{
+				incorrectInfos.push(allInfos[i]);
+			}
+		};
+		
+		// 解答終了
+		var time = new Date() - startTime;
+		var msg = "間違っている個数:" +  incorrectInfos.length +" (" + time +"ms) 内容:";
+		$.each(incorrectInfos, function(){msg = msg + " " + this.i + ":[" + this.typeNum +","+ this.x +","+  this.y +"] "});
+		$("#answer_area").text(msg);
+	});
+});
+
+// オブジェクトコピー
+function copyObject(src)
+{
+var dest;
+
+if (typeof src == 'object') {
+   if (src instanceof Array) {
+     dest = new Array();
+     for (var i=0;i<src.length;i++) {
+       dest[i] = copyObject(src[i]);
+     }
+   }
+   else
+   {
+     dest = new Object();
+     for (prop in src) {
+       dest[prop] = copyObject(src[prop]);
+     }
+   }
+ }
+ else {
+   dest = src;
+ }
+ return dest;
+}
+
+</script>
+</head>
+<h1>各情報の可能性を全網羅する全探索</h1>
+<input id="ary" type="text" size="100" value="[[1,101,1],[2,1,2],[2,2,3],[2,3,3],[1,1,3],[2,3,1],[1,5,5]]"></input>
+<br>
+<input id="n" type="text" size="10" value="100"></input>
+<br>
+<button id="calc" >Calc!</button>
+<br>
+答えは: <span id="answer_area"></span>
+<br>
+<div><a href="http://d.hatena.ne.jp/sifue">吉村 総一郎</a></div><br>
+</body>
+</html>
