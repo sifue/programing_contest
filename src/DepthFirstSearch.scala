@@ -1,16 +1,41 @@
 object DepthFirstSearch {
   def main(args: Array[String]) {
-    val n = 4
-    val a = List(1, 2, 4, 7)
-    val k = 13
+    val n = 20
+    val a = List(1, 10, 49, 3, 8, 13, 7, 23, 60, -500, 42, 599, 45, -23, 1, 10, 49, 3 ,8, 13)
+    val k = 444
 
-    def search(i:Int, sum:Int):Boolean = {
-      println("%1$s, %2$s".format(i, sum))
-      if (n == i) return sum == k
-      if (search(i + 1, sum + a(i))) true
-      if (search(i + 1, sum)) true
-      false
+    // リストの要素を最初から足すか足さないかという2択で考え
+    // 足さない, 足さない, 足さない, 足さない
+    // 足さない, 足さない, 足さない, 足す
+    // 足さない, 足さない, 足す, 足さない
+    // ...
+    // のように再帰関数を使って判定していく
+
+    /**
+     * 深さ優先探索を行う再帰関数
+     * @param index リストのインデックス
+     * @param addedList 足されたもののリスト
+     * @return 判定結果
+     */
+    def depthFirstSeach(index:Int, addedList:List[Int]):Boolean = {
+      // インデックスが最後のnに達していたら判定する
+      // addedList.foldLeft(0)(_+_) はリストの中身を全部足して集約するという意味
+      if (index == n) if (addedList.foldLeft(0)(_+_) == k) {
+        println("YES (%s)".format(addedList))
+        return true
+      } else {
+        return false
+      }
+
+      // インデックスが最後のnに達していない場合
+      // 今回を足さない場合と判定して残りを再帰的に判定する
+      if (depthFirstSeach(index + 1, addedList)) return true
+      // 今回を足す場合と判定して残りを再帰的に判定する
+      // addedList :+ a(index)はリストの末尾に要素を一つ足すという意味
+      if (depthFirstSeach(index + 1, addedList :+ a(index))) return true
+      // 全てのパターンを探しても見つからなかった時はfalse
+      return false
     }
-    println(search(0, 0))
+    depthFirstSeach(0, List())
   }
 }
