@@ -24,6 +24,9 @@ class Item
     }
 }
 
+/**
+ * メモ化使う動的計画法を行うクラス
+ */
 class Memo
 {
     private $numberOfItem = 4;
@@ -58,12 +61,13 @@ class Memo
      */
     public function maxValue($i, $restWeight)
     {
+        $key = $this->makeMemoKey($i, $restWeight);
         // すでにメモ化していればその値を返す
-        if (isset($this->memo[$i.','.$restWeight])) {
-            return $this->memo[$i.','.$restWeight];
+        if (isset($this->memo[$key])) {
+            return $this->memo[$key];
         }
 
-        if($i === $this->numberOfItem) {
+        if ($i === $this->numberOfItem) {
             // もう最期の品物であれば足せる価値はない
             $value = 0;
         } else if ($restWeight < $this->items[$i]->weight) {
@@ -72,16 +76,28 @@ class Memo
             $value = $this->maxValue($i + 1, $restWeight);
         } else {
             // i番目の品物を選ばなかった時のi +1番目の価値と
-            // i番目の品物を選んだ時のi +1番目の価値のうち、大きいほうが最大価値となる
+            // i番目の品物を選んだ時のi +1番目の価値のうち、大きいほうが最大価値とな
+            $item = $this->items[$i];
             $value =
                 max(
                     $this->maxValue($i + 1, $restWeight),
-                    $this->maxValue($i + 1, $restWeight - $this->items[$i]->weight)
-                        + $this->items[$i]->value
+                    $this->maxValue($i + 1, $restWeight - $item->weight) + $item->value
                 );
         }
         // この関数の結果をメモ化して返す
-        return $this->memo[$i.','.$restWeight] = $value;
+        return $this->memo[$key] = $value;
+    }
+
+    /**
+     * インデックス番号と許容重量からメモのキーを作成する
+     * @param $i
+     * @param $restWeight
+     * @return string 文字列のキー
+     */
+    private function makeMemoKey($i, $restWeight)
+    {
+        return $i . ',' . $restWeight;
     }
 }
+
 echo((new \Memo())->maxValue(0, 5));
