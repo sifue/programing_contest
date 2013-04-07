@@ -57,7 +57,7 @@ class Dijkstra {
      */
     private $vortexes = [];
     /**
-     * @var Edge[] fromをキーとしたハッシュ構造にtoとcostのクラスを入れる
+     * @var Edge[] fromをキーとしたハッシュ構造にEdgeクラスを入れる
      */
     private $edges = [];
     /**
